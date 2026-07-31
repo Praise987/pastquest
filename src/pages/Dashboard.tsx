@@ -47,14 +47,15 @@ export default function Home() {
                 </h1>
 
                 <p className="mt-5 text-lg text-gray-600">
-                  Find past questions, revise smarter, and pass with confidence.
+                  Find past questions, revise smarter and prepare confidently
+                  for your examinations.
                 </p>
 
-                <div className="mt-8 flex overflow-hidden rounded-xl border  border-gray-300">
+                <div className="mt-8 flex overflow-hidden rounded-xl border border-gray-300">
 
                   <div className="flex items-center px-4 text-gray-400">
                     <SearchIcon />
-                  </div>Find past questions, revise smarter, and pass with confidence.
+                  </div>
 
                   <input
                     type="text"
@@ -167,7 +168,7 @@ export default function Home() {
   </div>
 </div>
           
-            <div className="rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50 py-24 px-60 text-center">
+            <div className="rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50 py-24 px- text-center">
 
               <CloudUploadOutlinedIcon
                 sx={{ fontSize: 70 }}
