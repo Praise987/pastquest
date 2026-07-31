@@ -1,8 +1,9 @@
 import { useState, type MouseEvent } from "react";
 import { AppBar, Toolbar, Box, IconButton, Menu, MenuItem } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import logo from "../assets/logo 4.png";
+import dashboardLogo from "../assets/secondlogo.png";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -10,6 +11,9 @@ export default function Navbar() {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const isDashboard = location.pathname === "/dashboard";
+  const currentLogo = isDashboard ? dashboardLogo : logo;
 
   const handleOpenMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -24,8 +28,9 @@ export default function Navbar() {
       position="fixed"
       elevation={2}
       sx={{
-        bgcolor: "#ffffff",
-        color: "#1f3c88",
+        bgcolor: isDashboard ? "#1f3c88" : "#ffffff",
+        color: isDashboard ? "#ffffff" : "#1f3c88",
+        transition: "0.3s",
       }}
     >
       <Toolbar>
@@ -38,46 +43,75 @@ export default function Navbar() {
             justifyContent: "space-between",
           }}
         >
-          <div
-            className="flex items-center p-2 cursor-pointer"
-          >
-            <img src={logo}className="block w-44 p-3" />
-          </div>
+      
+          <Box component={Link}
+          to="/"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            textDecoration: "none",
+            }}
+            >
+              <img
+               src={currentLogo}
+               alt="PastQuest"
+               style={{
+                 height: isDashboard ? 120 : 100,
+                objectFit: "contain",
+               }}
+  />
+</Box>
+          
+          <div className="hidden items-center gap-10 md:flex">
+            <nav className="flex items-center gap-8">
+              <button
+                onClick={() =>
+                  navigate(isDashboard ? "/" : "/dashboard")
+                }
+                className={`font-semibold transition ${
+                  isDashboard
+                    ? "text-white hover:text-blue-200"
+                    : "text-[#223A72] hover:text-blue-700"
+                }`}
+              >
+                {isDashboard ? "Home" : "Dashboard"}
+              </button>
 
-          <div className="hidden items-center gap-120 md:flex">
-           <nav className="flex items-center gap-8">
-  <button
-    onClick={() =>
-      navigate(location.pathname === "/dashboard" ? "/" : "/dashboard")
-    }
-    className="font-semibold text-[#223A72] transition hover:text-blue-700"
-  >
-    {location.pathname === "/dashboard" ? "Home" : "Dashboard"}
-  </button>
-</nav>
-            <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate("/login")}
-                className="font-semibold text-[#223A72] hover:text-blue-700"
+                className={`font-semibold transition ${
+                  isDashboard
+                    ? "text-white hover:text-blue-200"
+                    : "text-[#223A72] hover:text-blue-700"
+                }`}
               >
                 Login
               </button>
 
               <button
                 onClick={() => navigate("/signup")}
-                className="rounded-xl bg-[#1f4fb8] px-6 py-2 font-semibold text-white transition hover:bg-[#153d93]"
+                className={`rounded-xl px-6 py-2 font-semibold transition ${
+                  isDashboard
+                    ? "bg-white text-[#1f3c88] hover:bg-gray-100"
+                    : "bg-[#1f4fb8] text-white hover:bg-[#153d93]"
+                }`}
               >
                 Sign Up
               </button>
-            </div>
+            </nav>
           </div>
 
+
           <div className="md:hidden">
-            <IconButton onClick={handleOpenMenu}>
+            <IconButton
+              onClick={handleOpenMenu}
+              sx={{ color: isDashboard ? "#fff" : "#1f3c88" }}
+            >
               <MenuIcon />
             </IconButton>
           </div>
 
+          
           <Menu
             anchorEl={anchorEl}
             open={open}
@@ -91,14 +125,14 @@ export default function Navbar() {
               horizontal: "right",
             }}
           >
-          <MenuItem
-  onClick={() => {
-    navigate(location.pathname === "/dashboard" ? "/" : "/dashboard");
-    handleCloseMenu();
-  }}
->
-  {location.pathname === "/dashboard" ? "Home" : "Dashboard"}
-</MenuItem>
+            <MenuItem
+              onClick={() => {
+                navigate(isDashboard ? "/" : "/dashboard");
+                handleCloseMenu();
+              }}
+            >
+              {isDashboard ? "Home" : "Dashboard"}
+            </MenuItem>
 
             <MenuItem
               onClick={() => {

@@ -31,27 +31,27 @@ export default function Home() {
     <>
       <Navbar />
 
-      <main className="min-h-screen bg-gray-100 py-10">
+      <main className="relative flex min-h-screen items-center overflow-hidden bg-gray-100 py-10">
 
-        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-6">
+        <div className="mx-auto mt-24 flex max-w-screen-2xl flex-col gap-8 px-8">
 
 
           <section className="overflow-hidden rounded-3xl bg-white shadow-sm">
 
-            <div className="grid gap-10 p-10 md:grid-cols-2 md:p-14">
+            <div className="grid gap-25 p-5 md:grid-cols-15md:p-4">
 
               <div className="flex flex-col justify-center">
 
-                <h1 className="text-5xl font-bold text-gray-900">
+                <h1 className="text-5xl mt: 10 font-bold text-gray-900">
                   PastQuest
                 </h1>
 
                 <p className="mt-5 text-lg text-gray-600">
                   Find past questions, revise smarter and prepare confidently
-                  for your examinations.
+                  for your test/examinations.
                 </p>
 
-                <div className="mt-8 flex overflow-hidden rounded-xl border border-gray-300">
+                <div className="mt-8 flex overflow-hidden xl border border-gray-300">
 
                   <div className="flex items-center px-4 text-gray-400">
                     <SearchIcon />
@@ -59,7 +59,7 @@ export default function Home() {
 
                   <input
                     type="text"
-                    placeholder="Search by course code, department..."
+                    placeholder="Search by course code, department, course or level       1 ..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
