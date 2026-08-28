@@ -208,7 +208,7 @@ export default function Home() {
 
       </section>
       <UploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} />
-      <Footer />
+      <Footer/>
     </>
   );
 }

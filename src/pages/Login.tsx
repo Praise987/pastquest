@@ -14,24 +14,52 @@ const validationSchema = Yup.object({
     .required("Password is required"),
 });
 
-
 export default function Login() {
   const navigate = useNavigate();
 
-const formik = useFormik({
-  initialValues: {
-    email: "",
-    password: "",
-  },
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
 
-  validationSchema,
+    validationSchema,
 
-  onSubmit: (values) => {
-    console.log(values);
+    onSubmit: async (values) => {
+      try {
+        const response = await fetch(
+          "http://localhost:5098/api/UserId/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: values.email,
+              password: values.password,
+            }),
+          }
+        );
 
-   
-  },
-});
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.message || "Login failed.");
+          return;
+        }
+
+        console.log("Login response:", data);
+
+        alert(data.message);
+
+       
+        navigate("/dashboard");
+      } catch (error) {
+        console.error("Login error:", error);
+        alert("Unable to connect to the server.");
+      }
+    },
+  });
 
   return (
     <Box
@@ -69,26 +97,49 @@ const formik = useFormik({
           <Typography variant="h4" sx={{ mb: 3 }}>
             Login
           </Typography>
-          <Box component="form"
-          onSubmit={formik.handleSubmit}
-           sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
+
+          <Box
+            component="form"
+            onSubmit={formik.handleSubmit}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
             }}
-            >
+          >
             <TextField
               label="Email"
               type="email"
               fullWidth
-              required
+              name="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={
+                formik.touched.email && Boolean(formik.errors.email)
+              }
+              helperText={
+                formik.touched.email ? formik.errors.email : ""
+              }
             />
 
             <TextField
               label="Password"
               type="password"
               fullWidth
-              required
+              name="password"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={
+                formik.touched.password &&
+                Boolean(formik.errors.password)
+              }
+              helperText={
+                formik.touched.password
+                  ? formik.errors.password
+                  : ""
+              }
             />
 
             <Button
@@ -96,20 +147,24 @@ const formik = useFormik({
               variant="contained"
               fullWidth
               size="large"
+              disabled={formik.isSubmitting}
             >
-              Login
+              {formik.isSubmitting ? "Logging in..." : "Login"}
             </Button>
 
             <Link
               component={RouterLink}
               to="/signup"
-              sx={{ alignSelf: "center", mt: 1 }}
+              sx={{
+                alignSelf: "center",
+                mt: 1,
+              }}
             >
               Don't have an account yet? Sign Up
             </Link>
           </Box>
         </Paper>
       </Container>
-     </Box>
+    </Box>
   );
 }

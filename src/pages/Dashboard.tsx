@@ -1,19 +1,26 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/NavBar";
-import Footer from "../components/Footer";
 import UploadDialog from "../components/UploadDialog";
-import logo from "../assets/logo5.png";
+import logo from "../assets/logo3.png";
 import SearchIcon from "@mui/icons-material/Search";
-import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
-
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import MenuIcon from "@mui/icons-material/Menu";
+import CloseIcon from "@mui/icons-material/Close";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 
 export default function Home() {
   const navigate = useNavigate();
 
   const [query, setQuery] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const desktopSearchInputRef = useRef<HTMLInputElement>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = () => {
     const trimmed = query.trim();
@@ -23,227 +30,513 @@ export default function Home() {
     navigate(`/search?q=${encodeURIComponent(trimmed)}`);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSearch();
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const scrollToSection = (id: string) => {
+    const section = document.getElementById(id);
+
+    if (section) {
+      section.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+
+    setSidebarOpen(false);
+  };
+
+  const goToSearchBar = () => {
+    scrollToSection("search-questions");
+
+    setTimeout(() => {
+      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+      const input = isDesktop
+        ? desktopSearchInputRef.current
+        : mobileSearchInputRef.current;
+
+      input?.focus();
+    }, 400);
   };
 
   return (
-    <>
-      <Navbar />
+    <div className="min-h-screen bg-[#f7f8fa] text-gray-900">
 
-      <main className="relative flex min-h-screen items-center overflow-hidden bg-gray-100 py-10">
+     
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-        <div className="mx-auto mt-24 flex max-w-screen-2xl flex-col gap-8 px-8">
+  
+      <aside
+        className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-300 ${
+          sidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
 
+   
+        <div className="flex h-20 items-center border-b border-gray-100 px-4">
 
-          <section className="overflow-hidden rounded-3xl bg-white shadow-sm">
+          <div className="flex items-center">
+            <img
+              src={logo}
+              alt="PastQuest"
+              className="h-17 w-37.5ject-contain"
+            />
+          </div>
 
-            <div className="grid gap-25 p-5 md:grid-cols-15md:p-4">
+          
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="ml-auto text-gray-500 lg:hidden"
+          >
+            <CloseIcon />
+          </button>
 
-              <div className="flex flex-col justify-center">
+        </div>
 
-                <h1 className="text-5xl mt: 10 font-bold text-gray-900">
-                  PastQuest
-                </h1>
+       
+        <nav className="flex-1 px-4 py-6">
 
-                <p className="mt-5 text-lg text-gray-600">
-                  Find past questions, revise smarter and prepare confidently
-                  for your test/examinations.
+          <SidebarItem
+            icon={<SearchOutlinedIcon fontSize="small" />}
+            label="Search Questions"
+            onClick={goToSearchBar}
+          />
+
+          <SidebarItem
+            icon={<CloudDownloadOutlinedIcon fontSize="small" />}
+            label="Downloads"
+            onClick={() => scrollToSection("downloads")}
+          />
+
+          <SidebarItem
+            icon={<CloudUploadOutlinedIcon fontSize="small" />}
+            label="Uploads"
+            onClick={() => scrollToSection("uploads")}
+          />
+
+        </nav>
+
+     
+        <div className="border-t border-gray-100 p-4">
+
+          <button
+            onClick={() => navigate("/login")}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-red-600"
+          >
+            <LogoutOutlinedIcon fontSize="small" />
+            <span>Logout</span>
+          </button>
+
+        </div>
+
+      </aside>
+
+    
+      <div className="lg:ml-64">
+        <header
+          id="search-questions"
+          className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-gray-200 bg-white/95 px-5 backdrop-blur md:px-8"
+        >
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
+          >
+            <MenuIcon />
+          </button>
+
+          <div className="hidden max-w-xl flex-1 md:block">
+
+            <div className="flex h-11 items-center rounded-lg border border-gray-200 bg-gray-50 transition focus-within:border-[#2f4571] focus-within:ring-2 focus-within:ring-[#2f4571]/40">
+
+              <SearchIcon
+                className="ml-4 text-gray-400"
+                fontSize="small"
+              />
+
+              <input
+                ref={desktopSearchInputRef}
+                type="text"
+                placeholder="Search past questions..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full bg-transparent px-3 text-sm outline-none placeholder:text-gray-400"
+              />
+
+              <button
+                onClick={handleSearch}
+                className="mr-1 rounded-md bg-[#2f4571] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#26395e]"
+              >
+                Search
+              </button>
+
+            </div>
+
+          </div>
+
+       
+          <div className="flex items-center gap-3">
+
+            <div className="hidden text-right sm:block">
+
+              <p className="text-sm font-semibold text-gray-800">
+                Student
+              </p>
+
+              <p className="text-xs text-gray-400">
+                Welcome back
+              </p>
+
+            </div>
+          </div>
+
+        </header>
+
+       
+        <main className="px-5 py-8 md:px-8">
+
+  
+          <div className="mb-7 md:hidden">
+
+            <div className="flex h-11 items-center rounded-lg border border-gray-200 bg-white transition focus-within:border-[#2f4571] focus-within:ring-2 focus-within:ring-[#2f4571]/40">
+
+              <SearchIcon
+                className="ml-4 text-gray-400"
+                fontSize="small"
+              />
+
+              <input
+                ref={mobileSearchInputRef}
+                type="text"
+                placeholder="Search past questions..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full bg-transparent px-3 text-sm outline-none"
+              />
+
+              <button
+                onClick={handleSearch}
+                className="mr-1 rounded-md bg-[#2f4571] px-4 py-2 text-sm text-white"
+              >
+                Search
+              </button>
+
+            </div>
+
+          </div>
+
+          <div className="mb-8 flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+
+            <div>
+
+              <p className="mb-1 text-sm text-gray-500">
+                Dashboard
+              </p>
+
+              <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
+                Welcome back
+              </h1>
+
+              <p className="mt-2 text-sm text-gray-500">
+                Find, download and share past questions with ease.
+              </p>
+
+            </div>
+
+            <button
+              onClick={() => setUploadOpen(true)}
+              className="flex w-fit items-center gap-2 rounded-lg bg-[#2f4571] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#26395e]"
+            >
+              <CloudUploadOutlinedIcon fontSize="small" />
+              Upload Question
+            </button>
+
+          </div>
+
+          <section className="mb-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+
+            <StatCard
+              title="Total Questions"
+              value="0"
+              description="Available resources"
+              icon={<SearchOutlinedIcon />}
+            />
+
+            <StatCard
+              title="Downloads"
+              value="0"
+              description="Questions downloaded"
+              icon={<CloudDownloadOutlinedIcon />}
+            />
+
+            <StatCard
+              title="Your Uploads"
+              value="0"
+              description="Questions uploaded"
+              icon={<CloudUploadOutlinedIcon />}
+            />
+
+            <StatCard
+              title="Pending Uploads"
+              value="0"
+              description="Awaiting approval"
+              icon={<ScheduleOutlinedIcon />}
+            />
+
+          </section>
+         
+          <div className="grid gap-6 xl:grid-cols-3">        
+            <section
+              id="downloads"
+              className="scroll-mt-24 rounded-xl border border-gray-200 bg-white xl:col-span-2"
+            >
+
+              <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
+
+                <div>
+
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Recent Downloads
+                  </h2>
+
+                  <p className="mt-1 text-sm text-gray-400">
+                    Your recently downloaded questions
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => navigate("/downloads")}
+                  className="flex items-center text-sm font-medium text-[#2f4571] hover:underline"
+                >
+                  View all
+                  <KeyboardArrowRightIcon fontSize="small" />
+                </button>
+
+              </div>
+
+              <EmptyState
+                type="downloads"
+                onAction={() => navigate("/search")}
+              />
+
+            </section>
+
+         
+            <section className="rounded-xl border border-gray-200 bg-white">
+
+              <div className="border-b border-gray-100 px-7 py-6">
+
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Popular Courses
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-400">
+                  Most accessed resources
+                </p>
+              </div>
+
+              <div className="space-y-2 p-6 min-h-40 flex items-center justify-center">
+
+                <h3 className="text-gray-500">No Course Yet</h3>
+
+              </div>
+
+            </section>
+
+          </div>
+           <section
+            id="uploads"
+            className="mt-6 scroll-mt-24 rounded-xl border border-gray-200 bg-white"
+          >
+
+            <div className="flex items-center justify-between border-b border-gray-100 px-7 py-6">
+
+              <div>
+
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Your Uploads
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-400">
+                  Questions and materials you've uploaded
                 </p>
 
-                <div className="mt-8 flex overflow-hidden xl border border-gray-300">
+              </div>
 
-                  <div className="flex items-center px-4 text-gray-400">
-                    <SearchIcon />
-                  </div>
+              <button
+                onClick={() => navigate("/upload")}
+                className="text-sm font-medium text-[#2f4571] hover:underline"
+              >
+                View all
+              </button>
 
-                  <input
-                    type="text"
-                    placeholder="Search by course code, department, course or level       1 ..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="flex-1 px-4 py-4 outline-none"
-                  />
+            </div>
 
-                  <button
-                    onClick={handleSearch}
-                    className="bg-blue-700 px-8 font-medium text-white transition hover:bg-blue-800"
-                  >
-                    Search
-                  </button>
+            <EmptyState
+              type="uploads"
+              onAction={() => setUploadOpen(true)}
+            />
 
+          </section>
+
+          
+          <section className="mt-6 rounded-xl border border-gray-200 bg-white p-8">
+
+            <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+
+              <div className="flex items-center gap-5">
+
+                <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-[#eef1f7] text-[#2f4571]">
+                  <CloudUploadOutlinedIcon fontSize="medium" />
+                </div>
+
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Have a question?
+                  </h2>
                 </div>
 
               </div>
 
-              <div className="flex items-center justify-center">
-
-                <img
-                  src={logo}
-                  alt="PastQuest"
-                  className="w-72 opacity-90"
-                />
-
-              </div>
-
-            </div>
-
-          </section>
-
-<section className="rounded-3xl bg-white p-10 shadow-sm">
-  <div className="mb-8 max-w-xl">
-  <div className="flex overflow-hidden rounded-xl border border-gray-300">
-    <div className="flex items-center px-4 text-gray-400">
-      <SearchIcon />
-    </div>
-
-    <input
-      type="text"
-      placeholder="Search Downloads"
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-      onKeyDown={handleKeyDown}
-      className="flex-1 flow: px-4 py-3 outline-none"
-    />
-
-    <button
-      onClick={handleSearch}
-      className="bg-blue-700 px-6 text-white hover:bg-blue-800"
-    >
-      Search
-    </button>
-  </div>
-
-  
-</div>
-
-<h1 className="text-3xl textalign: left font-bold text-gray-900">Downloads</h1>
-  <div className="rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50 p-30 text-center">
-    
-    <CloudDownloadOutlinedIcon
-      sx={{ fontSize: 70 }}
-      className="text-blue-600"
-    />
-
-    <h2 className="mt-6 text-2xl font-semibold">
-      No Downloads Yet?
-    </h2>
-
-    <p className="mx-auto mt-4 max-w-xl text-gray-600">
-      Download past questions to help you revise and prepare for your examinations
-    </p>
-
-    <button
-      onClick={() => navigate("/downloads")}          
-      className="mt-8 rounded-xl bg-blue-700 px-8 py-3 font-semibold text-white transition hover:bg-blue-800"
-    >
-      Download Question
-    </button>
-  </div>
-</section>
-
-<section className="rounded-6xl bg-white p-10 shadow-sm">
-  <div className="mb-8 max-w-lg">
-  <div className="flex overflow-hidden rounded-xl border border-gray-300">
-    <div className="flex items-center px-4 text-gray-400">
-      <SearchIcon />
-    </div>
-
-    <input
-      type="text"
-      placeholder="Search Uploads"
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-      onKeyDown={handleKeyDown}
-      className="flex-1 px-4 py-3 outline-none"
-    />
-
-    <button
-      onClick={handleSearch}
-      className="bg-blue-700 px-6 text-white hover:bg-blue-800"
-    >
-      Search
-    </button>
-  </div>
-</div>
-          
-            <div className="rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50 py-24 px- text-center">
-
-              <CloudUploadOutlinedIcon
-                sx={{ fontSize: 70 }}
-                className="text-blue-600"
-              />
-              
-
-              <h2 className="mt-6 text-2xl font-semibold">
-               No Uploads Yet?
-              </h2>
-
-              <p className="mx-auto mt-4 max-w-xl text-gray-600">
-                Upload past questions to help other students revise and prepare
-              </p>
-
               <button
-                onClick={() => setUploadOpen(true)}
-                className="mt-8 rounded-xl bg-blue-700 px-8 py-3 font-semibold text-white transition hover:bg-blue-800"
+              
+                className="rectangular-lg border border-[#2f4571] px-4 py-1 text-sm font-semibold text-[#2f4571] transition hover:bg-[#2f4571] hover:text-white"
               >
-                Upload Question
+               Help
               </button>
 
             </div>
 
           </section>
 
+        </main>
 
-          <section className="overflow-hidden rounded-3xl bg-blue-700">
-
-            <div className="grid items-center gap-10 p-10 md:grid-cols-2">
-
-              <div>
-
-                <h2 className="text-4xl font-bold text-white">
-                  Ready to Help Other Students?
-                </h2>
-
-                <p className="mt-5 text-lg text-blue-100">
-                  Every upload strengthens the library and helps students
-                  prepare better for examinations.
-                </p>
-
-                <button
-                  onClick={() => setUploadOpen(true)}
-                  className="mt-8 rounded-xl bg-white px-8 py-3 font-semibold text-blue-700 transition hover:bg-gray-100"
-                >
-                  Upload Now
-                </button>
-
-              </div>
-
-              <div className="flex justify-center">
-
-                <img
-                  src={logo}
-                  alt="PastQuest"
-                  className="w-72 opacity-30"
-                />
-
-              </div>
-
-            </div>
-
-          </section>
-
-        </div>
-
-      </main>
+      </div>
 
       <UploadDialog
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
       />
 
-      <Footer />
-    </>
+    </div>
+  );
+}
+
+interface SidebarItemProps {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+  onClick: () => void;
+}
+
+function SidebarItem({ icon, label, active = false, onClick,}: SidebarItemProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={`mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm transition ${
+        active
+          ? "bg-[#eef1f7] font-semibold text-[#2f4571]"
+          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+      }`}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
+  );
+}
+
+interface StatCardProps {
+  title: string;
+  value: string;
+  description: string;
+  icon: React.ReactNode;
+}
+
+function StatCard({
+  title,
+  value,
+  description,
+  icon,
+}: StatCardProps) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-6">
+
+      <div className="mb-6 flex items-center justify-between">
+
+        <p className="text-sm font-medium text-gray-500">
+          {title}
+        </p>
+
+        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#eef1f7] text-[#2f4571]">
+          {icon}
+        </div>
+
+      </div>
+
+      <h3 className="text-3xl font-bold text-gray-900">
+        {value}
+      </h3>
+
+      <p className="mt-1 text-xs text-gray-400">
+        {description}
+      </p>
+
+    </div>
+  );
+}
+
+interface EmptyStateProps {
+  type: "downloads" | "uploads";
+  onAction: () => void;
+}
+
+function EmptyState({
+  type,
+  onAction,
+}: EmptyStateProps) {
+
+  const isDownloads = type === "downloads";
+
+  return (
+    <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-xl bg-[#eef1f7] text-[#2f4571]">
+
+        {isDownloads ? (
+          <CloudDownloadOutlinedIcon fontSize="large" />
+        ) : (
+          <CloudUploadOutlinedIcon fontSize="large" />
+        )}
+
+      </div>
+
+      <h3 className="text-lg font-semibold text-gray-800">
+        {isDownloads
+          ? "No downloads yet"
+          : "No uploads yet"}
+      </h3>
+
+      <button
+        onClick={onAction}
+        className="mt-6 rounded-lg border border-[#2f4571] px-6 py-3 text-sm font-medium text-[#2f4571] transition hover:bg-[#2f4571] hover:text-white"
+      >
+         {isDownloads
+          ? "Find Questions"
+          : "Upload Question"}
+      </button>
+
+    </div>
   );
 }
