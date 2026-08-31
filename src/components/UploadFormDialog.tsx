@@ -91,46 +91,73 @@ export default function UploadFormDialog({
     form.level !== "" &&
     form.semester !== "" &&
     file !== null;
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  if (!isFormValid || !file) return;
 
-    if (!isFormValid || !file) return;
+  setSubmitting(true);
 
-    setSubmitting(true);
+  try {
+    const data = new FormData();
 
-    try {
-      const data = new FormData();
+    data.append("CourseCode", form.courseCode);
+    data.append("CourseTitle", form.courseTitle);
+    data.append("Department", form.department);
+    data.append("Level", form.level);
+    data.append("Semester", form.semester);
+    data.append("File", file);
 
-      data.append("courseCode", form.courseCode);
-      data.append("courseTitle", form.courseTitle);
-      data.append("department", form.department);
-      data.append("level", form.level);
-      data.append("semester", form.semester);
-      data.append("file", file);
+    
 
-      
+    const response = await fetch(
+      "http://localhost:5098/api/Materials",
+      {
+        method: "POST",
+        body: data,
+      }
+    );
 
-      setToast({
-        message: "Material uploaded successfully.",
-        severity: "success",
-      });
+    const result = await response.json();
 
-      setForm(INITIAL_FORM);
-      setFile(null);
+console.log("API response:", JSON.stringify(result, null, 2));
 
-      onClose();
-    } catch {
-      setToast({
-        message: "Something went wrong.",
-        severity: "error",
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
+if (!response.ok) {
+  console.error("Validation errors:", result.errors);
 
-  return (
+  throw new Error(
+    result.message ||
+    result.title ||
+    "Material upload failed."
+  );
+}
+
+    setToast({
+      message: "Material uploaded successfully.",
+      severity: "success",
+    });
+
+    setForm(INITIAL_FORM);
+    setFile(null);
+
+    onClose();
+
+  } catch (error) {
+    console.error("Upload error:", error);
+
+    setToast({
+      message:
+        error instanceof Error
+          ? error.message
+          : "Something went wrong.",
+      severity: "error",
+    });
+  } finally {
+    setSubmitting(false);
+  }
+};
+
+return (
     <>
       <Dialog
         open={open}
@@ -210,19 +237,16 @@ export default function UploadFormDialog({
                 </TextField>
 
                 <Button
-                  variant="outlined"
+                 variant="outlined"
                   component="label"
-                >
-                  {file ? file.name : "Choose File"}
-
-                  <input
-                    hidden
-                    type="file"
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    onChange={handleFileChange}
-                  />
-                </Button>
-
+                  >
+                    {file ? file.name : "Choose File"}
+                    <input
+                     hidden
+                       type="file"
+                       accept=".pdf,.png,.jpg,.jpeg"
+                       onChange={handleFileChange} />
+                       </Button>
                 {fileError && (
                   <Typography color="error">
                     {fileError}

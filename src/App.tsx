@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUpForm";
 import Dashboard from "./pages/Dashboard";
+import Questions from "./pages/Questions";
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
 <Route path="/signup" element={<SignUp />} />
        
 
+      <Route path="/questions" element={<Questions />} />
         <Route
           path="/dashboard"
           element={<Dashboard />}

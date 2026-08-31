@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UploadDialog from "../components/UploadDialog";
 import logo from "../assets/logo3.png";
@@ -14,13 +14,9 @@ import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 
 export default function Home() {
   const navigate = useNavigate();
-
   const [query, setQuery] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const desktopSearchInputRef = useRef<HTMLInputElement>(null);
-  const mobileSearchInputRef = useRef<HTMLInputElement>(null);
 
   const handleSearch = () => {
     const trimmed = query.trim();
@@ -51,23 +47,10 @@ export default function Home() {
     setSidebarOpen(false);
   };
 
-  const goToSearchBar = () => {
-    scrollToSection("search-questions");
-
-    setTimeout(() => {
-      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-      const input = isDesktop
-        ? desktopSearchInputRef.current
-        : mobileSearchInputRef.current;
-
-      input?.focus();
-    }, 400);
-  };
 
   return (
     <div className="min-h-screen bg-[#f7f8fa] text-gray-900">
 
-     
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/30 lg:hidden"
@@ -75,7 +58,6 @@ export default function Home() {
         />
       )}
 
-  
       <aside
         className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-300 ${
           sidebarOpen
@@ -84,7 +66,6 @@ export default function Home() {
         }`}
       >
 
-   
         <div className="flex h-20 items-center border-b border-gray-100 px-4">
 
           <div className="flex items-center">
@@ -94,8 +75,7 @@ export default function Home() {
               className="h-17 w-37.5ject-contain"
             />
           </div>
-
-          
+  
           <button
             onClick={() => setSidebarOpen(false)}
             className="ml-auto text-gray-500 lg:hidden"
@@ -105,14 +85,13 @@ export default function Home() {
 
         </div>
 
-       
         <nav className="flex-1 px-4 py-6">
 
-          <SidebarItem
-            icon={<SearchOutlinedIcon fontSize="small" />}
-            label="Search Questions"
-            onClick={goToSearchBar}
-          />
+   <SidebarItem
+  icon={<SearchOutlinedIcon fontSize="small" />}
+  label="Questions"
+  onClick={() => navigate("/questions")}
+/>
 
           <SidebarItem
             icon={<CloudDownloadOutlinedIcon fontSize="small" />}
@@ -127,7 +106,6 @@ export default function Home() {
           />
 
         </nav>
-
      
         <div className="border-t border-gray-100 p-4">
 
@@ -143,7 +121,6 @@ export default function Home() {
 
       </aside>
 
-    
       <div className="lg:ml-64">
         <header
           id="search-questions"
@@ -166,7 +143,6 @@ export default function Home() {
               />
 
               <input
-                ref={desktopSearchInputRef}
                 type="text"
                 placeholder="Search past questions..."
                 value={query}
@@ -186,7 +162,6 @@ export default function Home() {
 
           </div>
 
-       
           <div className="flex items-center gap-3">
 
             <div className="hidden text-right sm:block">
@@ -204,10 +179,8 @@ export default function Home() {
 
         </header>
 
-       
         <main className="px-5 py-8 md:px-8">
 
-  
           <div className="mb-7 md:hidden">
 
             <div className="flex h-11 items-center rounded-lg border border-gray-200 bg-white transition focus-within:border-[#2f4571] focus-within:ring-2 focus-within:ring-[#2f4571]/40">
@@ -218,7 +191,6 @@ export default function Home() {
               />
 
               <input
-                ref={mobileSearchInputRef}
                 type="text"
                 placeholder="Search past questions..."
                 value={query}
@@ -333,8 +305,7 @@ export default function Home() {
               />
 
             </section>
-
-         
+            
             <section className="rounded-xl border border-gray-200 bg-white">
 
               <div className="border-b border-gray-100 px-7 py-6">
@@ -392,7 +363,6 @@ export default function Home() {
 
           </section>
 
-          
           <section className="mt-6 rounded-xl border border-gray-200 bg-white p-8">
 
             <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
@@ -410,14 +380,10 @@ export default function Home() {
                 </div>
 
               </div>
-
-              <button
-              
+                 <button
                 className="rectangular-lg border border-[#2f4571] px-4 py-1 text-sm font-semibold text-[#2f4571] transition hover:bg-[#2f4571] hover:text-white"
               >
-               Help
-              </button>
-
+               Help </button>
             </div>
 
           </section>
@@ -536,7 +502,6 @@ function EmptyState({
           ? "Find Questions"
           : "Upload Question"}
       </button>
-
     </div>
   );
 }

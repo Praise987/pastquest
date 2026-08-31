@@ -34,11 +34,16 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
 
-  const handleSearch = () => {
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
-  };
+ const handleSearch = () => {
+  const trimmed = query.trim();
+
+  if (!trimmed) {
+    navigate("/questions");
+    return;
+  }
+
+  navigate(`/questions?q=${encodeURIComponent(trimmed)}`);
+};
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") handleSearch();
