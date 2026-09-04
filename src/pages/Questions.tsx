@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 interface Material {
   id: number;
-  title: string;
+  courseTitle: string;
   courseCode: string;
   department: string;
   level: string;
@@ -12,193 +12,221 @@ interface Material {
   fileUrl?: string;
 }
 
+function useDebounce<T>(value: T, delay = 1000): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 export default function Questions() {
   const [search, setSearch] = useState("");
-  const [materials, setMaterials] = useState<Material[]>([]);
+  const debouncedSearch = useDebounce(search, 1000);
+  const [allMaterials, setAllMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5098/api/Materials")
-      .then((response) => {
+    const controller = new AbortController();
+
+    const fetchMaterials = async () => {
+      try {
+        setLoading(true);
+
+        const trimmedSearch = debouncedSearch.trim();
+
+        const url = trimmedSearch
+          ? `http://localhost:5098/api/Materials?query=${encodeURIComponent(
+              trimmedSearch
+            )}`
+          : "http://localhost:5098/api/Materials";
+
+        const response = await fetch(url, {
+          signal: controller.signal,
+        });
+
         if (!response.ok) {
-          throw new Error("Failed to fetch materials");
+          throw new Error(`Failed to fetch materials: ${response.status}`);
         }
 
-        return response.json();
-      })
+        const data = await response.json();
+        setAllMaterials(Array.isArray(data) ? data : []);
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
 
-      .then((data) => {
-  console.log("API DATA:", data);
-  setMaterials(data);
-})
-
-      .catch((error) => {
         console.error("Error fetching materials:", error);
-      })
-      .finally(() => {
+        setAllMaterials([]);
+      } finally {
         setLoading(false);
-      });
-  }, []);
+      }
+    };
 
- const filteredMaterials = materials.filter((material) =>
-  [
-    material.title,
-    material.courseCode,
-    material.department,
-    material.level,
-    material.semester,
-    material.year,
-  ].some((field) =>
-    String(field ?? "").toLowerCase().includes(search.toLowerCase())
-  )
-);
+    fetchMaterials();
+
+    return () => controller.abort();
+  }, [debouncedSearch]);
+
   
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen bg-[#f7f9fc]">
+      <section className="border-b border-gray-100 bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <h1 className="text-3xl font-bold text-[#1f2d4d] sm:text-4xl">
+              Find Past Questions
+            </h1>
 
-       <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold text-[#2f4571] md:text-4xl">
-          Questions
-        </h1>
+            <p className="mt-3 text-sm leading-6 text-gray-500 sm:text-base">
+              Search and download past examination questions by course,
+              department, level, semester or year.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <p className="text-base text-gray-500">
-          Search all the available Past Questions
-        </p>
-      </div>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-10">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by course code, title, department, level, semester or year..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-2xl border border-gray-200 bg-white py-4 pl-13 pr-5 text-sm text-gray-700 shadow-sm outline-none transition-all placeholder:text-gray-400 hover:border-gray-300 focus:border-[#2f4571] focus:ring-4 focus:ring-[#2f4571]/10"
+            />
+          </div>
 
+        </div>
    
-      <div className="relative mb-8 w-full">
-        <input
-          type="text"
-          placeholder="Search by course code, title, department, level or year..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-gray-200 bg-white px-5 py-4 text-sm text-gray-700 outline-none focus:border-[#2f4571]"
-        />
-      </div>
-
-    
-      {loading ? (
-        <div className="py-16 text-center">
-          <p className="text-gray-500">
-            Loading past questions...
-          </p>
-        </div>
-      ) : filteredMaterials.length > 0 ? (
-
-       
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-
-          {filteredMaterials.map((material) => (
-            <div
-              key={material.id}
-              className="flex min-h-82.5 flex-col rounded-2xl border bg-white p-6"
-            >
-
-            
-              <div className="mb-5 flex items-start justify-between gap-3">
-
-                <span className="rounded-lg bg-[#2f4571]/10 px-3 py-1.5 text-sm font-bold text-[#2f4571]">
-                  {material.courseCode}
-                </span>
-
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    material.status === "Available"
-                      ? "bg-green-100 text-green-700"
-                      : material.status === "Downloaded"
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {material.status}
-                </span>
-
+        {loading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((item) => (
+              <div
+                key={item}
+                className= "rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+              >
               </div>
+            ))}
+          </div>
+        ) : allMaterials.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {allMaterials.map((material) => (
+              <div
+                key={material.id}
+                className="group flex min-h-87.5 flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#2f4571]/20 hover:shadow-xl"
+              >               
+                <div className="border-b border-gray-100 bg-linear-to-r from-[#2f4571]/5 to-transparent px-6 py-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="rounded-lg bg-[#2f4571] px-3 py-1.5 text-xs font-bold tracking-wide text-white">
+                      {material.courseCode}
+                    </span>
+                  </div>
+                </div>
+          
+                <div className="flex flex-1 flex-col px-6 py-6">
+                  <h2 className="mb-5 line-clamp-2 text-lg font-bold  text-[#1f2d4d] transition-colors group-hover:text-[#2f4571]">
+                    {material.courseTitle}
+                  </h2>
 
-              
-              <h3 className="mb-5 text-lg font-semibold leading-6 text-gray-800">
-                {material.title}
-              </h3>
+                  <div className="space-y-4">
+                    <div className="flex gap-1">
+                      <div>
+                        <p className="text-[11px] font-medium  text-gray-400">
+                          Department
+                        </p>
+                        <p className="mt-0.5 text-sm font-medium text-gray-700">
+                          {material.department}
+                        </p>
+                      </div>
+                    </div>
 
-              
-              <div className="space-y-3 text-sm text-gray-500">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[11px] font-medium  text-gray-400">
+                          Level
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-700">
+                          {material.level}
+                        </p>
+                      </div>
 
-                <p>
-                  <span className="font-semibold text-gray-700">
-                    Department:
-                  </span>{" "}
-                  {material.department}
-                </p>
+                      <div>
+                        <p className="text-[11px] font-medium text-gray-400">
+                          Semester
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-gray-700">
+                          {material.semester}
+                        </p>
+                      </div>
+                    </div>
 
-                <p>
-                  <span className="font-semibold text-gray-700">
-                    Level:
-                  </span>{" "}
-                  {material.level}
-                </p>
+                    <div>
+                      <p className="text-[11px] font-medium text-gray-400">
+                        Academic Year
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-gray-700">
+                        {material.year  }
+                      </p>
+                    </div>
+                  </div>
 
-                <p>
-                  <span className="font-semibold text-gray-700">
-                    Semester:
-                  </span>{" "}
-                  {material.semester}
-                </p>
-
-                <p>
-                  <span className="font-semibold text-gray-700">
-                    Year:
-                  </span>{" "}
-                  {material.year}
-                </p>
-
+                  <div className="mt-auto pt-6">
+                    {material.fileUrl ? (
+                      <a
+                        href={material.fileUrl}
+                        download
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2f4571] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#24375c] hover:shadow-md active:scale-[0.98]"
+                      >
+                        Download Question
+                      </a>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled
+                        className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-400"
+                      >
+                        File Not Available
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-
-             
-              <div className="mt-auto pt-6">
-
-                {material.fileUrl ? (
-                  <a
-                    href={material.fileUrl}
-                    download
-                    className="block w-full rounded-lg bg-[#2f4571] px-4 py-3 text-center font-medium text-white transition hover:bg-[#24375c]"
-                  >
-                    Download
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    disabled
-                    className="w-full cursor-not-allowed rounded-lg bg-gray-300 px-4 py-3 font-medium text-gray-500"
-                  >
-                    File Not Available
-                  </button>
-                )}
-
-              </div>
-
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-20 text-center shadow-sm">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#2f4571]/10">
             </div>
-          ))}
 
-        </div>
+            <h2 className="text-lg font-bold text-[#1f2d4d]">
+              No past questions found
+            </h2>
 
-      ) : (
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-400">
+              We couldn't find any questions matching your search. Try a
+              different course code, department, level, or semester.
+            </p>
 
-       
-        <div className="rounded-xl bg-white py-16 text-center shadow-sm">
-
-          <p className="text-gray-500">
-            No Past Questions found.
-          </p>
-
-          <p className="mt-1 text-sm text-gray-400">
-            Try searching for another course code, department or year.
-          </p>
-
-        </div>
-      )}
-
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="mt-6 rounded-xl bg-[#2f4571] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#24375c]"
+              >
+                Clear Search
+              </button>
+            )}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { Box, Button, Container, Paper, TextField, Typography, Link, IconButton,} from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -16,6 +17,7 @@ const validationSchema = Yup.object({
 
 export default function Login() {
   const navigate = useNavigate();
+  const [loginSucceeded, setLoginSucceeded] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -43,17 +45,20 @@ export default function Login() {
 
         const data = await response.json();
 
-        if (!response.ok) {
-          alert(data.message || "Login failed.");
-          return;
-        }
+       if (!response.ok) {
+  alert(data.message || "Login failed.");
+  return;
+}
 
-        console.log("Login response:", data);
+console.log("Login response:", data);
 
-        alert(data.message);
+localStorage.setItem("isLoggedIn", "true");
 
-       
-        navigate("/dashboard");
+setLoginSucceeded(true);
+
+alert(data.message || "Login successful!");
+
+navigate("/home");
       } catch (error) {
         console.error("Login error:", error);
         alert("Unable to connect to the server.");
@@ -98,15 +103,20 @@ export default function Login() {
             Login
           </Typography>
 
-          <Box
-            component="form"
-            onSubmit={formik.handleSubmit}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
+          {loginSucceeded ? (
+            <Typography color="success.main">
+              {"Login successful. Redirecting..."}
+            </Typography>
+          ) : (
+            <Box
+              component="form"
+              onSubmit={formik.handleSubmit}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
             <TextField
               label="Email"
               type="email"
@@ -162,7 +172,8 @@ export default function Login() {
             >
               Don't have an account yet? Sign Up
             </Link>
-          </Box>
+            </Box>
+          )}
         </Paper>
       </Container>
     </Box>

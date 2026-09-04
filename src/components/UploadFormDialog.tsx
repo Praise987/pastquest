@@ -11,6 +11,11 @@ const DEPARTMENTS = [
 
 const LEVELS = ["100", "200", "300", "400", "500"];
 
+const YEARS = Array.from(
+  { length: 6 },
+  (_, index) => new Date().getFullYear() - index
+);
+
 const SEMESTERS = [
   { value: "First", label: "First Semester" },
   { value: "Second", label: "Second Semester" },
@@ -25,6 +30,7 @@ interface FormState {
   department: string;
   level: string;
   semester: string;
+  year: number
 }
 
 const INITIAL_FORM: FormState = {
@@ -33,6 +39,7 @@ const INITIAL_FORM: FormState = {
   department: "",
   level: "",
   semester: "",
+  year: new Date().getFullYear(),
 };
 
 interface UploadFormDialogProps {
@@ -58,7 +65,7 @@ export default function UploadFormDialog({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setForm((prev) => ({
         ...prev,
-        [field]: e.target.value,
+        [field]: field === "year" ? Number(e.target.value) : e.target.value,
       }));
     };
 
@@ -106,6 +113,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     data.append("Department", form.department);
     data.append("Level", form.level);
     data.append("Semester", form.semester);
+    data.append("Year", form.year.toString());
     data.append("File", file);
 
     
@@ -232,6 +240,22 @@ return (
                   {SEMESTERS.map((sem) => (
                     <MenuItem key={sem.value} value={sem.value}>
                       {sem.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                
+                <TextField
+                  select
+                  label="Year"
+                  value={form.year}
+                  onChange={handleChange("year")}
+                  fullWidth
+                  required
+                >
+                  {YEARS.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
                     </MenuItem>
                   ))}
                 </TextField>

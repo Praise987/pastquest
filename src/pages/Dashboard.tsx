@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UploadDialog from "../components/UploadDialog";
 import logo from "../assets/logo3.png";
@@ -17,6 +17,35 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [totalMaterials, setTotalMaterials] = useState("0");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadTotalMaterials = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5098/api/Materials/total"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch total materials");
+        }
+        const data = await response.json();
+
+if (!cancelled) {
+  setTotalMaterials(String(data.totalMaterial));
+}
+      } catch (error) {
+        console.error("Error fetching total materials:", error);
+      }
+    };
+
+    void loadTotalMaterials();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSearch = () => {
     const trimmed = query.trim();
@@ -242,7 +271,7 @@ export default function Home() {
 
             <StatCard
               title="Total Questions"
-              value="0"
+              value={totalMaterials}
               description="Available resources"
               icon={<SearchOutlinedIcon />}
             />

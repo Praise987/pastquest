@@ -1,6 +1,7 @@
 import { Box, Button, Container, Paper, TextField,Typography,IconButton,} from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -26,6 +27,7 @@ const validationSchema = Yup.object({
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const [signupSucceeded, setSignupSucceeded] = useState(false);
 
   const formik = useFormik<SignUpData>({
     initialValues: {
@@ -58,9 +60,9 @@ export default function SignUp() {
 
         console.log("Signup successful:", data);
 
-            navigate("/dashboard");
-
+        setSignupSucceeded(true);
         alert("Account created successfully!");
+        navigate("/dashboard");
 
       } catch (error) {
         console.error("Signup request failed:", error);
@@ -106,15 +108,20 @@ export default function SignUp() {
             Sign Up
           </Typography>
 
-          <Box
-            component="form"
-            onSubmit={formik.handleSubmit}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
+          {signupSucceeded ? (
+            <Typography color="success.main">
+              Account created successfully. Redirecting...
+            </Typography>
+          ) : (
+            <Box
+              component="form"
+              onSubmit={formik.handleSubmit}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
            
             <TextField
               label="Email"
@@ -185,7 +192,8 @@ export default function SignUp() {
             
               }
             </Button>
-          </Box>
+            </Box>
+          )}
         </Paper>
       </Container>
     </Box>

@@ -1,5 +1,5 @@
 import { useState, type MouseEvent } from "react";
-import { AppBar, Toolbar, Box, IconButton, Menu, MenuItem } from "@mui/material";
+import { AppBar, Toolbar, Box, IconButton, Menu, MenuItem,} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import logo from "../assets/logo 4.png";
@@ -10,6 +10,12 @@ export default function Navbar() {
   const location = useLocation();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    localStorage.getItem("isLoggedIn") === "true"
+  );
+
   const open = Boolean(anchorEl);
 
   const isDashboard = location.pathname === "/dashboard";
@@ -21,6 +27,13 @@ export default function Navbar() {
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    setIsLoggedIn(false);
+    handleCloseMenu();
+    navigate("/home");
   };
 
   return (
@@ -44,74 +57,92 @@ export default function Navbar() {
           }}
         >
       
-          <Box component={Link}
-          to="/"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            textDecoration: "none",
+          <Box
+            component={Link}
+            to={isLoggedIn ? "/home" : "/"}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              textDecoration: "none",
             }}
-            >
-              <img
-               src={currentLogo}
-               alt="PastQuest"
-               style={{
-                 height: isDashboard ? 120 : 100,
+          >
+            <img
+              src={currentLogo}
+              alt="PastQuest"
+              style={{
+                height: isDashboard ? 120 : 100,
                 objectFit: "contain",
-               }}
-  />
-</Box>
-          
+              }}
+            />
+          </Box>
+
+        
           <div className="hidden items-center gap-10 md:flex">
             <nav className="flex items-center gap-8">
-              <button
-                onClick={() =>
-                  navigate(isDashboard ? "/" : "/dashboard")
-                }
-                className={`font-semibold transition ${
-                  isDashboard
-                    ? "text-white hover:text-blue-200"
-                    : "text-[#223A72] hover:text-blue-700"
-                }`}
-              >
-                {isDashboard ? "Home" : "Dashboard"}
-              </button>
 
-              <button
-                onClick={() => navigate("/login")}
-                className={`font-semibold transition ${
-                  isDashboard
-                    ? "text-white hover:text-blue-200"
-                    : "text-[#223A72] hover:text-blue-700"
-                }`}
-              >
-                Login
-              </button>
+              
+                
+               {isLoggedIn ? (
+               <>
+                  <button
+                    onClick={() => navigate("/dashboard")}
+                    className={`font-semibold transition ${
+                      isDashboard
+                        ? "text-white hover:text-blue-200"
+                        : "text-[#223A72] hover:text-blue-700"
+                    }`}
+                  >
+                    Dashboard
+                  </button>
 
-              <button
-                onClick={() => navigate("/signup")}
-                className={`rounded-xl px-6 py-2 font-semibold transition ${
-                  isDashboard
-                    ? "bg-white text-[#1f3c88] hover:bg-gray-100"
-                    : "bg-[#1f4fb8] text-white hover:bg-[#153d93]"
-                }`}
-              >
-                Sign Up
-              </button>
+
+                  <button
+                    onClick={handleLogout}
+                    className={`rounded-xl px-6 py-2 font-semibold transition ${
+                      isDashboard
+                        ? "bg-white text-[#1f3c88] hover:bg-gray-100"
+                        : "bg-[#1f4fb8] text-white hover:bg-[#153d93]"
+                    }`}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+         
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="font-semibold text-[#223A72] transition hover:text-blue-700"
+                  >
+                    Login
+                  </button>
+
+                  {/* Sign Up */}
+                  <button
+                    onClick={() => navigate("/signup")}
+                    className="rounded-xl bg-[#1f4fb8] px-6 py-2 font-semibold text-white transition hover:bg-[#153d93]"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
+
             </nav>
           </div>
 
-
+          {/* Mobile Menu Button */}
           <div className="md:hidden">
             <IconButton
               onClick={handleOpenMenu}
-              sx={{ color: isDashboard ? "#fff" : "#1f3c88" }}
+              sx={{
+                color: isDashboard ? "#fff" : "#1f3c88",
+              }}
             >
               <MenuIcon />
             </IconButton>
           </div>
 
-          
+          {/* Mobile Menu */}
           <Menu
             anchorEl={anchorEl}
             open={open}
@@ -125,32 +156,46 @@ export default function Navbar() {
               horizontal: "right",
             }}
           >
-            <MenuItem
-              onClick={() => {
-                navigate(isDashboard ? "/" : "/dashboard");
-                handleCloseMenu();
-              }}
-            >
-              {isDashboard ? "Home" : "Dashboard"}
-            </MenuItem>
+            {isLoggedIn ? (
+              <>
+                {/* Dashboard */}
+                <MenuItem
+                  onClick={() => {
+                    navigate("/dashboard");
+                    handleCloseMenu();
+                  }}
+                >
+                  Dashboard
+                </MenuItem>
 
-            <MenuItem
-              onClick={() => {
-                navigate("/login");
-                handleCloseMenu();
-              }}
-            >
-              Login
-            </MenuItem>
+                {/* Logout */}
+                <MenuItem onClick={handleLogout}>
+                  Logout
+                </MenuItem>
+              </>
+            ) : (
+              <>
+                {/* Login */}
+                <MenuItem
+                  onClick={() => {
+                    navigate("/login");
+                    handleCloseMenu();
+                  }}
+                >
+                  Login
+                </MenuItem>
 
-            <MenuItem
-              onClick={() => {
-                navigate("/signup");
-                handleCloseMenu();
-              }}
-            >
-              Sign Up
-            </MenuItem>
+                {/* Sign Up */}
+                <MenuItem
+                  onClick={() => {
+                    navigate("/signup");
+                    handleCloseMenu();
+                  }}
+                >
+                  Sign Up
+                </MenuItem>
+              </>
+            )}
           </Menu>
         </Box>
       </Toolbar>
